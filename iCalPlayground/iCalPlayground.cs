@@ -1,12 +1,11 @@
-﻿using System;
-
-namespace iCalPlayground
+﻿namespace iCalPlayground
 {
     internal class iCalPlayground
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            Console.WriteLine(NextOccurrenceWorkflow.RecurringEventThanksgiving());
         }
     }
 }
