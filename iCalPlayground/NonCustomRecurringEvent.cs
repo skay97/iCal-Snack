@@ -6,7 +6,7 @@ using Calendar = Ical.Net.Calendar;
 
 namespace iCalPlayground
 {
-    public class NextOccurrenceWorkflow
+    public class NonCustomRecurringEvent
     {
         private Calendar ICalCalendar = new Calendar();
         private DateTime CurrentDate = DateTime.Now;

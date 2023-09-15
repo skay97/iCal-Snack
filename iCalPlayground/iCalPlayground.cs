@@ -6,11 +6,11 @@
         {
             Console.WriteLine("Hello World!");
 
-            var nextOccurrenceWorkflow = new NextOccurrenceWorkflow();
+            var nonCustomRecurringEvent = new NonCustomRecurringEvent();
 
             //Console.WriteLine(nextOccurrenceWorkflow.DailyRecurringEvent());
             //Console.WriteLine(nextOccurrenceWorkflow.WeeklyRecurringEvent());
-            Console.WriteLine(nextOccurrenceWorkflow.MonthlyRecurringEvent());
+            Console.WriteLine(nonCustomRecurringEvent.MonthlyRecurringEvent());
         }
     }
 }
