@@ -34,8 +34,6 @@ namespace iCalPlayground
 
         public Occurrence RecurringEventThanksgiving()
         {
-            var calendar = new Calendar();
-
             var recurrenceRule = new RecurrencePattern
             {
                 Frequency = FrequencyType.Yearly,
@@ -65,8 +63,6 @@ namespace iCalPlayground
 
         public Occurrence DailyRecurringEvent()
         {
-            var calendar = new Calendar();
-
             var recurrenceRule = new RecurrencePattern
             {
                 Frequency = FrequencyType.Daily,
@@ -90,6 +86,29 @@ namespace iCalPlayground
 
             // Returns tomorrow if current time is after recurringCalEvent.End. Otherwise, returns today.
             return nextOccurrences.First();
+        }
+
+        public Period WeeklyRecurringEvent()
+        {
+            var recurrenceRule = new RecurrencePattern
+            {
+                Frequency = FrequencyType.Weekly,
+                Interval = 1,
+                Until = DateTime.MaxValue
+            };
+
+            var recurringEvent = new CalendarEvent
+            {
+                Start = new CalDateTime(DateTime.Parse("2023-09-15T07:00")),
+                End = new CalDateTime(DateTime.Parse("2023-09-15T07:00").AddHours(1)),
+                RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
+            };
+
+            ICalCalendar.Events.Add (recurringEvent);
+
+            var nextOccurrences = ICalCalendar.GetOccurrences(CurrentDate, CurrentDate.AddMonths(1));
+
+            return nextOccurrences.First().Period;
         }
     }
 }

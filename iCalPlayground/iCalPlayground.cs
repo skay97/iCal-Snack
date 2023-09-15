@@ -5,7 +5,11 @@
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            Console.WriteLine(NextOccurrenceWorkflow.DailyRecurringEvent());
+
+            var nextOccurrenceWorkflow = new NextOccurrenceWorkflow();
+
+            //Console.WriteLine(nextOccurrenceWorkflow.DailyRecurringEvent());
+            Console.WriteLine(nextOccurrenceWorkflow.WeeklyRecurringEvent());
         }
     }
 }
