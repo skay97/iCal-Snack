@@ -60,5 +60,31 @@ namespace iCalPlayground
 
             return nextOccurrences.First();
         }
+
+        public static Occurrence DailyRecurringEvent()
+        {
+            var calendar = new Calendar();
+
+            var recurrenceRule = new RecurrencePattern
+            {
+                Frequency = FrequencyType.Daily,
+                Interval = 1,
+                Until = DateTime.MaxValue
+            };
+
+            var recurringCalEvent = new CalendarEvent
+            {
+                Start = new CalDateTime(DateTime.Parse("2023-09-13T07:00")),
+                End = new CalDateTime(DateTime.Parse("2023-09-13T07:00").AddHours(1)),
+                RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
+            };
+
+            calendar.Events.Add(recurringCalEvent);
+
+            var nextOccurrences = calendar.GetOccurrences(DateTime.Now, DateTime.Now.AddDays(5));
+
+            // Returns tomorrow if current time is after recurringCalEvent.End. Otherwise, returns today.
+            return nextOccurrences.First();
+        }
     }
 }
