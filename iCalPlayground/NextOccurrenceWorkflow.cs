@@ -8,6 +8,8 @@ namespace iCalPlayground
 {
     public class NextOccurrenceWorkflow
     {
+        private Calendar ICalCalendar = new Calendar();
+        private DateTime CurrentDate = DateTime.Now;
         public static string Calendar()
         {
             var calendar = new Calendar();
@@ -30,7 +32,7 @@ namespace iCalPlayground
             return result;
         }
 
-        public static Occurrence RecurringEventThanksgiving()
+        public Occurrence RecurringEventThanksgiving()
         {
             var calendar = new Calendar();
 
@@ -52,16 +54,16 @@ namespace iCalPlayground
                 RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
             };
 
-            calendar.Events.Add(recurringCalEvent);
+            ICalCalendar.Events.Add(recurringCalEvent);
 
             var searchStart = DateTime.Parse("2000-01-01");
 
-            var nextOccurrences = calendar.GetOccurrences(searchStart, DateTime.Now);
+            var nextOccurrences = ICalCalendar.GetOccurrences(searchStart, CurrentDate);
 
             return nextOccurrences.First();
         }
 
-        public static Occurrence DailyRecurringEvent()
+        public Occurrence DailyRecurringEvent()
         {
             var calendar = new Calendar();
 
@@ -79,9 +81,12 @@ namespace iCalPlayground
                 RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
             };
 
-            calendar.Events.Add(recurringCalEvent);
+            ICalCalendar.Events.Add(recurringCalEvent);
 
-            var nextOccurrences = calendar.GetOccurrences(DateTime.Now, DateTime.Now.AddDays(5));
+            var nextOccurrences = ICalCalendar.GetOccurrences(CurrentDate, CurrentDate.AddDays(5));
+
+            // TODO: Add tests to verify you do not get the event for today if
+            // the event end time is before current time.
 
             // Returns tomorrow if current time is after recurringCalEvent.End. Otherwise, returns today.
             return nextOccurrences.First();
