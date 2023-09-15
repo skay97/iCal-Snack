@@ -6,10 +6,8 @@ using Calendar = Ical.Net.Calendar;
 
 namespace iCalPlayground
 {
-    public class NonCustomRecurringEvent
+    public class NonCustomRecurringEvent : BaseRecurringEvent
     {
-        private Calendar ICalCalendar = new Calendar();
-        private DateTime CurrentDate = DateTime.Now;
         public static string Calendar()
         {
             var calendar = new Calendar();
@@ -30,16 +28,6 @@ namespace iCalPlayground
             string result = iCalSerializer.SerializeToString(calendar);
 
             return result;
-        }
-
-        public static CalendarEvent CreateGenericRecurringEvent(DateTime startTime, DateTime endTime, RecurrencePattern recurrenceRule)
-        {
-            return new CalendarEvent
-            {
-                Start = new CalDateTime(startTime),
-                End = new CalDateTime(endTime),
-                RecurrenceRules = new List<RecurrencePattern> { recurrenceRule }
-            };
         }
 
         public Occurrence RecurringEventThanksgiving()
