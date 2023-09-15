@@ -9,7 +9,8 @@
             var nextOccurrenceWorkflow = new NextOccurrenceWorkflow();
 
             //Console.WriteLine(nextOccurrenceWorkflow.DailyRecurringEvent());
-            Console.WriteLine(nextOccurrenceWorkflow.WeeklyRecurringEvent());
+            //Console.WriteLine(nextOccurrenceWorkflow.WeeklyRecurringEvent());
+            Console.WriteLine(nextOccurrenceWorkflow.MonthlyRecurringEvent());
         }
     }
 }

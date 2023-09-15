@@ -32,6 +32,16 @@ namespace iCalPlayground
             return result;
         }
 
+        public static CalendarEvent CreateGenericRecurringEvent(DateTime startTime, DateTime endTime, RecurrencePattern recurrenceRule)
+        {
+            return new CalendarEvent
+            {
+                Start = new CalDateTime(startTime),
+                End = new CalDateTime(endTime),
+                RecurrenceRules = new List<RecurrencePattern> { recurrenceRule }
+            };
+        }
+
         public Occurrence RecurringEventThanksgiving()
         {
             var recurrenceRule = new RecurrencePattern
@@ -70,16 +80,14 @@ namespace iCalPlayground
                 Until = DateTime.MaxValue
             };
 
-            var recurringCalEvent = new CalendarEvent
-            {
-                Start = new CalDateTime(DateTime.Parse("2023-09-13T07:00")),
-                End = new CalDateTime(DateTime.Parse("2023-09-13T07:00").AddHours(1)),
-                RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
-            };
+            var recurringCalEvent = CreateGenericRecurringEvent(DateTime.Parse("2023-09-13T07:00"),
+                DateTime.Parse("2023-09-13T07:00").AddHours(1),
+                recurrenceRule);
 
             ICalCalendar.Events.Add(recurringCalEvent);
 
-            var nextOccurrences = ICalCalendar.GetOccurrences(CurrentDate, CurrentDate.AddDays(5));
+            var nextOccurrences = ICalCalendar
+                .GetOccurrences(CurrentDate, CurrentDate.AddDays(5));
 
             // TODO: Add tests to verify you do not get the event for today if
             // the event end time is before current time.
@@ -97,16 +105,35 @@ namespace iCalPlayground
                 Until = DateTime.MaxValue
             };
 
-            var recurringEvent = new CalendarEvent
+            var recurringCalEvent = CreateGenericRecurringEvent(DateTime.Parse("2023-09-15T07:00"),
+                DateTime.Parse("2023-09-15T07:00").AddHours(1),
+                recurrenceRule);
+
+            ICalCalendar.Events.Add (recurringCalEvent);
+
+            var nextOccurrences = ICalCalendar
+                .GetOccurrences(CurrentDate, CurrentDate.AddMonths(1));
+
+            return nextOccurrences.First().Period;
+        }
+
+        public Period MonthlyRecurringEvent()
+        {
+            var recurrenceRule = new RecurrencePattern
             {
-                Start = new CalDateTime(DateTime.Parse("2023-09-15T07:00")),
-                End = new CalDateTime(DateTime.Parse("2023-09-15T07:00").AddHours(1)),
-                RecurrenceRules = new List<RecurrencePattern>() { recurrenceRule }
+                Frequency = FrequencyType.Monthly,
+                Interval = 1,
+                Until = DateTime.MaxValue
             };
 
-            ICalCalendar.Events.Add (recurringEvent);
+            var recurringCalEvent = CreateGenericRecurringEvent(DateTime.Parse("2023-09-15T07:00"), 
+                DateTime.Parse("2023-09-15T07:00").AddHours(1),
+                recurrenceRule);
 
-            var nextOccurrences = ICalCalendar.GetOccurrences(CurrentDate, CurrentDate.AddMonths(1));
+            ICalCalendar.Events.Add(recurringCalEvent);
+
+            var nextOccurrences = ICalCalendar
+                .GetOccurrences(CurrentDate, CurrentDate.AddMonths(3));
 
             return nextOccurrences.First().Period;
         }
