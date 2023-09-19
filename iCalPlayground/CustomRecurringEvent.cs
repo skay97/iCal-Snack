@@ -5,7 +5,7 @@ namespace iCalPlayground
 {
     public class CustomRecurringEvent : BaseRecurringEvent
     {
-        public Calendar CustomDayRecurrence(int interval)
+        public Calendar CustomDayRecurrence(int interval, DateTime eventStartTime, DateTime eventEndTime)
         {
             var recurrenceRule = new RecurrencePattern
             {
@@ -14,16 +14,13 @@ namespace iCalPlayground
                 Until = DateTime.MaxValue
             };
 
-            var recurringCalEvent = CreateGenericRecurringEvent(DateTime.Parse("2023-09-15T07:00"),
-                DateTime.Parse("2023-09-15T07:00").AddHours(1),
+            var recurringCalEvent = CreateGenericRecurringEvent(eventStartTime,
+                eventEndTime,
                 recurrenceRule);
 
             ICalCalendar.Events.Add(recurringCalEvent);
 
             return ICalCalendar;
-
-            //return ICalCalendar
-            //    .GetOccurrences(CurrentDate, CurrentDate.AddMonths(3));
         }
     }
 }
