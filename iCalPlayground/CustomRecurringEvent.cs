@@ -41,5 +41,24 @@ namespace iCalPlayground
 
             return ICalCalendar;
         }
+
+        public Calendar CustomWeekRecurrence(List<WeekDay> daysOfWeekList, DateTime eventStartTime, DateTime eventEndTime, int interval = 1)
+        {
+            var recurrenceRule = new RecurrencePattern
+            {
+                Frequency = FrequencyType.Weekly,
+                Interval = interval,
+                ByDay = daysOfWeekList,
+                Until = DateTime.MaxValue
+            };
+
+            var recurringCalEvent = CreateGenericRecurringEvent(eventStartTime,
+                eventEndTime,
+                recurrenceRule);
+
+            ICalCalendar.Events.Add(recurringCalEvent);
+
+            return ICalCalendar;
+        }
     }
 }

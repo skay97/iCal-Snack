@@ -142,7 +142,72 @@ namespace iCalPlayground.Tests
                 Assert.True(monthlyRecurrence.Last().Period.StartTime.Month == 5);
             }
 
-            // Add case for dst
+            [Fact]
+            public void Return_Expected_Weekly_Occurrences()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+
+                var daysOfWeekList = new List<WeekDay> 
+                {
+                    new WeekDay(DayOfWeek.Monday),
+                    new WeekDay(DayOfWeek.Tuesday), 
+                    new WeekDay(DayOfWeek.Wednesday)
+                }; 
+
+                // Act
+                var weeklyRecurrence = calWithRecurrence
+                    .CustomWeekRecurrence(daysOfWeekList: daysOfWeekList,
+                        eventStartTime: DateTime.Parse("2023-09-18T08:30"),
+                        eventEndTime: DateTime.Parse("2023-09-18T09:30"))
+                    .GetOccurrences(DateTime.Parse("2023-09-18T06:00"),
+                        DateTime.Parse("2023-09-30T06:00"));
+
+                // Assert
+                Assert.Equal(6, weeklyRecurrence.Count);
+                Assert.Collection(weeklyRecurrence, 
+                    (occurrence) => Assert.Equal(18, occurrence.Period.StartTime.Day), // Monday
+                    (occurrence) => Assert.Equal(19, occurrence.Period.StartTime.Day), // Tuesday
+                    (occurrence) => Assert.Equal(20, occurrence.Period.StartTime.Day), // Wednesday
+                    (occurrence) => Assert.Equal(25, occurrence.Period.StartTime.Day), // Monday
+                    (occurrence) => Assert.Equal(26, occurrence.Period.StartTime.Day), // Tuesday
+                    (occurrence) => Assert.Equal(27, occurrence.Period.StartTime.Day)); // Wednesday
+            }
+
+            [Fact]
+            public void Return_Expected_Weekly_Occurrences_Without_Date_that_does_not_fall_in_timeline()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+
+                var daysOfWeekList = new List<WeekDay>
+                {
+                    new WeekDay(DayOfWeek.Monday),
+                    new WeekDay(DayOfWeek.Tuesday),
+                    new WeekDay(DayOfWeek.Wednesday)
+                };
+
+                // Act
+                var weeklyRecurrence = calWithRecurrence
+                    .CustomWeekRecurrence(daysOfWeekList: daysOfWeekList,
+                        eventStartTime: DateTime.Parse("2023-09-19T08:30"),
+                        eventEndTime: DateTime.Parse("2023-09-19T09:30"))
+                    .GetOccurrences(DateTime.Parse("2023-09-18T06:00"),
+                        DateTime.Parse("2023-09-30T06:00"));
+
+                // Assert
+                Assert.Equal(5, weeklyRecurrence.Count);
+
+                // Despite the 18th being a Monday, it is not part of the schedule
+                // because the event starts from the 19th.
+                Assert.DoesNotContain(weeklyRecurrence, (x) => x.Period.StartTime.Day == 18);
+
+                // Since the schedule started on the 19th, it includes the event
+                // that takes place on Monday the 25th.
+                Assert.Contains(weeklyRecurrence, (x) => x.Period.StartTime.Day == 25);
+            }
+
+            // Add case for dst forward and backwards. if backwards, the event should not happen twice. Forwards, the date should be what we expect
         }
     }
 }
