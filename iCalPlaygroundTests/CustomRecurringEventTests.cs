@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Ical.Net.DataTypes;
+using Xunit;
 
 namespace iCalPlayground.Tests
 {
@@ -67,7 +68,79 @@ namespace iCalPlayground.Tests
                 Assert.True(dailyRecurrences.First().Period.StartTime.Date == DateTime.Parse("2023-09-19T06:00").Date);
             }
 
-            // Add monthly test cases
+            [Fact]
+            public void Return_Expected_Month_Occurrences()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+
+                // Act
+                var monthlyRecurrence = calWithRecurrence
+                    .CustomMonthRecurrence(ordinalDayOfMonth: 10,
+                        eventStartTime: DateTime.Parse("2023-09-19T08:30"),
+                        eventEndTime: DateTime.Parse("2023-09-19T09:30"))
+                    .GetOccurrences(DateTime.Parse("2023-09-19T06:00"),
+                        DateTime.Parse("2023-12-19T06:00"));
+
+                // Assert
+                // Returns events from September to December.
+                Assert.Equal(4, monthlyRecurrence.Count);
+                Assert.True(monthlyRecurrence.First().Period.StartTime.Month == 9);
+            }
+
+            [Fact]
+            public void Return_Expected_Month_Occurrences_For_Day_That_Does_Not_Fall_In_Every_Month()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+
+                // Act
+                var monthlyRecurrence = calWithRecurrence
+                    .CustomMonthRecurrence(ordinalDayOfMonth: 31,
+                        eventStartTime: DateTime.Parse("2023-08-31T08:30"),
+                        eventEndTime: DateTime.Parse("2023-08-31T09:30"))
+                    .GetOccurrences(DateTime.Parse("2023-09-19T06:00"),
+                        DateTime.Parse("2024-01-01T06:00"));
+
+                // Assert
+                // Returns events from September 19th to January 1st. Since October
+                // and December are only only months in the timeline that have
+                // 31 days, only 2 events will be returned.
+                Assert.Equal(2, monthlyRecurrence.Count);
+
+                // verifies first occurrence takes place in October.
+                Assert.True(monthlyRecurrence.First().Period.StartTime.Month == 10);
+            }
+
+            [Fact]
+            public void Return_Expected_Month_Occurrences_For_Interval_Based_Event()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+
+                // Act
+                var monthlyRecurrence = calWithRecurrence
+                    .CustomMonthRecurrence(ordinalDayOfMonth: 10,
+                        eventStartTime: DateTime.Parse("2023-09-19T08:30"),
+                        eventEndTime: DateTime.Parse("2023-09-19T09:30"),
+                        interval: 2)
+                    .GetOccurrences(DateTime.Parse("2023-09-19T06:00"),
+                        DateTime.Parse("2024-06-19T06:00"));
+
+                // Assert
+                // Returns events from September '23 to June '24.
+                Assert.Equal(5, monthlyRecurrence.Count);
+                Assert.True(monthlyRecurrence.First().Period.StartTime.Month == 9);
+
+                // Ensures the months are what we expect: September, Nov, Jan,
+                // March, May
+                Assert.Collection(monthlyRecurrence, (occurrence) => Assert.Equal(9, occurrence.Period.StartTime.Month),
+                    (occurrence) => Assert.Equal(11, occurrence.Period.StartTime.Month),
+                    (occurrence) => Assert.Equal(1, occurrence.Period.StartTime.Month),
+                    (occurrence) => Assert.Equal(3, occurrence  .Period.StartTime.Month),
+                    (occurrence) => Assert.Equal(5, occurrence.Period.StartTime.Month));
+                Assert.True(monthlyRecurrence.Last().Period.StartTime.Month == 5);
+            }
 
             // Add case for dst
         }
