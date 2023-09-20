@@ -217,10 +217,10 @@ namespace iCalPlayground.Tests
                 // Act
                 var dailyRecurrencesCalendar = calWithRecurrence
                     .CustomDayRecurrence(interval: 1,
-                        eventStartTime: DateTime.Parse("2023-03-10T03:00"),
-                        eventEndTime: DateTime.Parse("2023-03-10T04:00"));
+                        eventStartTime: DateTime.Parse("2023-03-10T02:30"),
+                        eventEndTime: DateTime.Parse("2023-03-10T03:30"));
 
-                foreach(var e in dailyRecurrencesCalendar.Events)
+                foreach (var e in dailyRecurrencesCalendar.Events)
                 {
                     e.Start = e.Start.ToTimeZone("Central Standard Time");
                     e.End = e.End.ToTimeZone("Central Standard Time");
@@ -231,29 +231,42 @@ namespace iCalPlayground.Tests
                         DateTime.Parse("2023-03-15T01:00"));
 
                 var dailyRecurrencesInLocalAndUtcTime = dailyRecurrences
-                    .Select(o => new { Local = o.Period.StartTime, Utc = o.Period.StartTime.AsUtc })
+                    .Select(o =>
+                        new
+                        {
+                            Local = o.Period.StartTime.AsUtc.ToLocalTime(),
+                            Utc = o.Period.StartTime.AsUtc
+                        })
                     .OrderBy(o => o.Local)
                     .ToList();
 
                 // Assert
                 Assert.Equal(5, dailyRecurrencesInLocalAndUtcTime.Count);
 
-                // Ensure UTC hour is an hour BEHIND when DST goes into effect
+                // Ensure UTC hour is an hour BEHIND after DST goes into effect
                 // and we DO NOT SKIP an instance.
                 Assert.Collection(dailyRecurrencesInLocalAndUtcTime,
                     (occurrences) =>
                     {
-                        Assert.Equal(9, occurrences.Utc.Hour);
+                        Assert.Equal(2, occurrences.Local.Hour);
+                        Assert.Equal(8, occurrences.Utc.Hour);
                         Assert.Equal(10, occurrences.Utc.Day);
                     },
                     (occurrences) =>
                     {
-                        Assert.Equal(9, occurrences.Utc.Hour);
+                        Assert.Equal(2, occurrences.Local.Hour);
+                        Assert.Equal(8, occurrences.Utc.Hour);
                         Assert.Equal(11, occurrences.Utc.Day);
+
                     },
                     (occurrences) =>
                     {
+                        // Since the 2 AM hour does not exist when DST goes into
+                        // effect the occurrence takes place at the 3 AM hour.
+                        Assert.Equal(3, occurrences.Local.Hour);
+
                         Assert.Equal(8, occurrences.Utc.Hour);
+
                         // DST begins on the 12th in 2023. Since we can assert
                         // that the occurrence includes the 12, we know the
                         // instance was not skipped.
@@ -261,13 +274,17 @@ namespace iCalPlayground.Tests
                     },
                     (occurrences) =>
                     {
-                        Assert.Equal(8, occurrences.Utc.Hour);
+                        Assert.Equal(2, occurrences.Local.Hour);
+                        Assert.Equal(7, occurrences.Utc.Hour);
                         Assert.Equal(13, occurrences.Utc.Day);
+
                     },
                     (occurrences) =>
                     {
-                        Assert.Equal(8, occurrences.Utc.Hour);
+                        Assert.Equal(2, occurrences.Local.Hour);
+                        Assert.Equal(7, occurrences.Utc.Hour);
                         Assert.Equal(14, occurrences.Utc.Day);
+
                     });
             }
 
@@ -294,7 +311,12 @@ namespace iCalPlayground.Tests
                         DateTime.Parse("2023-11-08T12:00"));
 
                 var dailyRecurrencesInLocalAndUtcTime = dailyRecurrences
-                    .Select(o => new { Local = o.Period.StartTime, Utc = o.Period.StartTime.AsUtc })
+                    .Select(o => 
+                        new 
+                        { 
+                            Local = o.Period.StartTime.AsUtc.ToLocalTime(),
+                            Utc = o.Period.StartTime.AsUtc 
+                        })
                     .OrderBy(o => o.Local)
                     .ToList();
 
