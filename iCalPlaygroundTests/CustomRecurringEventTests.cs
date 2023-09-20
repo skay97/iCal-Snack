@@ -213,17 +213,20 @@ namespace iCalPlayground.Tests
             {
                 // Arrange
                 var calWithRecurrence = new CustomRecurringEvent();
-                var localStartDateTime = new LocalDateTime(2023, 03, 10, 3, 00);
-                var localEndDateTime = new LocalDateTime(2023, 03, 10, 4, 00);
-                var dateTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("US/Central");
-                var startDateTimeWithTimeZone = localStartDateTime.InZoneLeniently(dateTimeZone);
-                var endDateTimeWithTimeZone = localEndDateTime.InZoneLeniently(dateTimeZone);
 
                 // Act
-                var dailyRecurrences = calWithRecurrence
+                var dailyRecurrencesCalendar = calWithRecurrence
                     .CustomDayRecurrence(interval: 1,
-                        eventStartTime: localStartDateTime.ToDateTimeUnspecified(),
-                        eventEndTime: localEndDateTime.ToDateTimeUnspecified())
+                        eventStartTime: DateTime.Parse("2023-03-10T03:00"),
+                        eventEndTime: DateTime.Parse("2023-03-10T04:00"));
+
+                foreach(var e in dailyRecurrencesCalendar.Events)
+                {
+                    e.Start = e.Start.ToTimeZone("Central Standard Time");
+                    e.End = e.End.ToTimeZone("Central Standard Time");
+                }
+
+                var dailyRecurrences = dailyRecurrencesCalendar
                     .GetOccurrences(DateTime.Parse("2023-03-10T01:00"),
                         DateTime.Parse("2023-03-15T01:00"));
 
@@ -273,17 +276,20 @@ namespace iCalPlayground.Tests
             {
                 // Arrange
                 var calWithRecurrence = new CustomRecurringEvent();
-                var localStartDateTime = new LocalDateTime(2023, 11, 03, 1, 00);
-                var localEndDateTime = new LocalDateTime(2023, 11, 03, 2, 00);
-                var dateTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("US/Central");
-                var startDateTimeWithTimeZone = localStartDateTime.InZoneLeniently(dateTimeZone);
-                var endDateTimeWithTimeZone = localEndDateTime.InZoneLeniently(dateTimeZone);
 
                 // Act
-                var dailyRecurrences = calWithRecurrence
+                var dailyRecurrencesCalendar = calWithRecurrence
                     .CustomDayRecurrence(interval: 1,
-                        eventStartTime: localStartDateTime.ToDateTimeUnspecified(),
-                        eventEndTime: localEndDateTime.ToDateTimeUnspecified())
+                        eventStartTime: DateTime.Parse("2023-11-03T01:00"),
+                        eventEndTime: DateTime.Parse("2023-11-03T02:00"));
+
+                foreach (var e in dailyRecurrencesCalendar.Events)
+                {
+                    e.Start = e.Start.ToTimeZone("Central Standard Time");
+                    e.End = e.End.ToTimeZone("Central Standard Time");
+                }
+
+                var dailyRecurrences = dailyRecurrencesCalendar
                     .GetOccurrences(DateTime.Parse("2023-11-03T12:00"),
                         DateTime.Parse("2023-11-08T12:00"));
 
@@ -305,7 +311,7 @@ namespace iCalPlayground.Tests
                     },
                     (occurrences) =>
                     {
-                        Assert.Equal(7, occurrences.Utc.Hour);
+                        Assert.Equal(6, occurrences.Utc.Hour);
                         Assert.Equal(5, occurrences.Utc.Day);
                     },
                     (occurrences) =>
