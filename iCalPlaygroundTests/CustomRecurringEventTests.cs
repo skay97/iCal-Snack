@@ -1,4 +1,5 @@
 ﻿using Ical.Net.DataTypes;
+using NodaTime;
 using Xunit;
 
 namespace iCalPlayground.Tests
@@ -207,7 +208,124 @@ namespace iCalPlayground.Tests
                 Assert.Contains(weeklyRecurrence, (x) => x.Period.StartTime.Day == 25);
             }
 
-            // Add case for dst forward and backwards. if backwards, the event should not happen twice. Forwards, the date should be what we expect
+            [Fact]
+            public void Return_Expected_Day_Occurrences_For_DST_Spring()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+                var localStartDateTime = new LocalDateTime(2023, 03, 10, 3, 00);
+                var localEndDateTime = new LocalDateTime(2023, 03, 10, 4, 00);
+                var dateTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("US/Central");
+                var startDateTimeWithTimeZone = localStartDateTime.InZoneLeniently(dateTimeZone);
+                var endDateTimeWithTimeZone = localEndDateTime.InZoneLeniently(dateTimeZone);
+
+                // Act
+                var dailyRecurrences = calWithRecurrence
+                    .CustomDayRecurrence(interval: 1,
+                        eventStartTime: localStartDateTime.ToDateTimeUnspecified(),
+                        eventEndTime: localEndDateTime.ToDateTimeUnspecified())
+                    .GetOccurrences(DateTime.Parse("2023-03-10T01:00"),
+                        DateTime.Parse("2023-03-15T01:00"));
+
+                var dailyRecurrencesInLocalAndUtcTime = dailyRecurrences
+                    .Select(o => new { Local = o.Period.StartTime, Utc = o.Period.StartTime.AsUtc })
+                    .OrderBy(o => o.Local)
+                    .ToList();
+
+                // Assert
+                Assert.Equal(5, dailyRecurrencesInLocalAndUtcTime.Count);
+
+                // Ensure UTC hour is an hour BEHIND when DST goes into effect
+                // and we DO NOT SKIP an instance.
+                Assert.Collection(dailyRecurrencesInLocalAndUtcTime,
+                    (occurrences) =>
+                    {
+                        Assert.Equal(9, occurrences.Utc.Hour);
+                        Assert.Equal(10, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(9, occurrences.Utc.Hour);
+                        Assert.Equal(11, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(8, occurrences.Utc.Hour);
+                        // DST begins on the 12th in 2023. Since we can assert
+                        // that the occurrence includes the 12, we know the
+                        // instance was not skipped.
+                        Assert.Equal(12, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(8, occurrences.Utc.Hour);
+                        Assert.Equal(13, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(8, occurrences.Utc.Hour);
+                        Assert.Equal(14, occurrences.Utc.Day);
+                    });
+            }
+
+            [Fact]
+            public void Return_Expected_Day_Occurrences_For_DST_Fall()
+            {
+                // Arrange
+                var calWithRecurrence = new CustomRecurringEvent();
+                var localStartDateTime = new LocalDateTime(2023, 11, 03, 1, 00);
+                var localEndDateTime = new LocalDateTime(2023, 11, 03, 2, 00);
+                var dateTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("US/Central");
+                var startDateTimeWithTimeZone = localStartDateTime.InZoneLeniently(dateTimeZone);
+                var endDateTimeWithTimeZone = localEndDateTime.InZoneLeniently(dateTimeZone);
+
+                // Act
+                var dailyRecurrences = calWithRecurrence
+                    .CustomDayRecurrence(interval: 1,
+                        eventStartTime: localStartDateTime.ToDateTimeUnspecified(),
+                        eventEndTime: localEndDateTime.ToDateTimeUnspecified())
+                    .GetOccurrences(DateTime.Parse("2023-11-03T12:00"),
+                        DateTime.Parse("2023-11-08T12:00"));
+
+                var dailyRecurrencesInLocalAndUtcTime = dailyRecurrences
+                    .Select(o => new { Local = o.Period.StartTime, Utc = o.Period.StartTime.AsUtc })
+                    .OrderBy(o => o.Local)
+                    .ToList();
+
+                // Assert
+                Assert.Equal(5, dailyRecurrencesInLocalAndUtcTime.Count);
+
+                // Ensure UTC hour is an hour AHEAD when DST ENDS
+                // and we DO NOT REPEAT instances.
+                Assert.Collection(dailyRecurrencesInLocalAndUtcTime,
+                    (occurrences) =>
+                    {
+                        Assert.Equal(6, occurrences.Utc.Hour);
+                        Assert.Equal(4, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(7, occurrences.Utc.Hour);
+                        Assert.Equal(5, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(7, occurrences.Utc.Hour);
+                        // since day is not the 5th again, we can successfully
+                        // determine that the schedule instance did not repeat.
+                        Assert.Equal(6, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(7, occurrences.Utc.Hour);
+                        Assert.Equal(7, occurrences.Utc.Day);
+                    },
+                    (occurrences) =>
+                    {
+                        Assert.Equal(7, occurrences.Utc.Hour);
+                        Assert.Equal(8, occurrences.Utc.Day);
+                    });
+            }
         }
     }
 }
